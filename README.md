@@ -111,9 +111,9 @@ The three target dimensions were calculated as follows:
 
 | Target | Items and calculation |
 |---|---|
-| Energetic Arousal (EA) |$$ EA = \frac{EA_1 + 100 - EA_2}{2}$$ |
-| Valence (V) | $$ V = \frac{V_2 + 100 - V_1}{2}$$ |
-| Calmness \(C\) | $$ C = \frac{C_1 + 100 - C_2}{2}$$ |
+| Energetic Arousal (EA) |$$EA = \frac{EA_1 + 100 - EA_2}{2}$$ |
+| Valence (V) | $$V = \frac{V_2 + 100 - V_1}{2}$$ |
+| Calmness \(C\) | $$C = \frac{C_1 + 100 - C_2}{2}$$ |
 
 The original item pairs were:
 
