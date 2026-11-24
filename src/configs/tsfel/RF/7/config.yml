@@ -1,0 +1,49 @@
+seed: 42
+
+studies:
+  5:
+    {}
+
+extractor:
+  movement_type: 'tsfel'          # Operational mode: 'raw', 'move', 'tsfel', 'tsfel-move' or 'fitbit'
+  window_min: 5                   # Lookback window size in minutes
+  include_magnitude: True         # Append vector magnitude calculation step
+  include_jerk: True              # Append jerk calculation step
+  top_k: null                     # Non-redundant tsfel features to select per label
+  corr_threshold: null            # Pearson correlation coefficient cut-off for tsfel feature selection
+  sampling_rate_raw: 64           # Unified target baseline frequency in Hz for raw data
+  minimum_samples: 10             # Amount of samples a participant must contribute minimally
+
+label_transformer:
+  transformer_name: MinMaxTransform
+  transformer_args:
+    scale_range: [0.0, 100.0]
+    from_logits: False
+
+dataset_split:
+  splitter_name: BetweenSubjectSplitter # Name of the data splitter class
+  splitter_args:
+    n_splits: 10
+    verbose: True
+
+dataloader:
+  batch_size: 32                  # Samples per batch for training, doubled for testing
+  shuffle: True                   # Whether to shuffle the training data, for training always False automatically
+  num_workers: 8                  # CPU threads for data loading
+  pin_memory: True                # If True, copies Tensors into CUDA pinned memory
+  prefetch_factor: 2              # Batches loaded in advance by each worker
+  drop_last: True                 # If True, drops the last incomplete batch, for training always False automatically
+
+train_args:
+  eval_metrics: ["mae", "rmse"]
+  verbose: True
+
+backend:
+  model_name: XGBoostRandomForestRegressor
+  model_args:
+    objective: reg:logistic
+    num_parallel_tree: 800
+    max_depth: 10
+    subsample: 0.8
+    colsample_bynode: 0.8
+    random_state: 42

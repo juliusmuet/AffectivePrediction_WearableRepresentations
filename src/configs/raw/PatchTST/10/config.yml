@@ -1,0 +1,80 @@
+seed: 42
+
+studies:
+  5:
+    {}
+
+extractor:
+  movement_type: 'raw'            # Operational mode: 'raw', 'move', 'tsfel', 'tsfel-move' or 'fitbit'
+  window_min: 5                   # Lookback window size in minutes
+  include_magnitude: True         # Append vector magnitude calculation step
+  include_jerk: True              # Append jerk calculation step
+  top_k: null                     # Non-redundant tsfel features to select per label
+  corr_threshold: null            # Pearson correlation coefficient cut-off for tsfel feature selection
+  sampling_rate_raw: 64           # Unified target baseline frequency in Hz for raw data
+  minimum_samples: 10             # Amount of samples a participant must contribute minimally
+
+label_transformer:
+  transformer_name: LogitTransform
+  transformer_args:
+    eps: 0.001
+
+dataset_split:
+  splitter_name: WithinSubjectSplitter # Name of the data splitter class
+  splitter_args:
+    verbose: True
+
+dataloader:
+  batch_size: 32                  # Samples per batch for training, doubled for testing
+  shuffle: True                   # Whether to shuffle the training data, for training always False automatically
+  num_workers: 8                  # CPU threads for data loading
+  pin_memory: True                # If True, copies Tensors into CUDA pinned memory
+  prefetch_factor: 2              # Batches loaded in advance by each worker
+  drop_last: True                 # If True, drops the last incomplete batch, for training always False automatically
+
+data_scaler:
+  method: 'standard'              # Scaler type: 'standard', 'robust'
+  calibration_ratio: 0.50         # Ratio of data used for validation / test calibration in between splits
+  min_calibration_samples: 10     # Minimum of samples per participant used for calibration in between splits
+
+data_scheduler:
+  scheduler_name: KDELabelScheduler
+
+train_args:
+  use_mixed_precision: True       # Use mixed precision
+  num_epochs: 50                  # Amount of training epochs
+  early_stopping_patience: 7      # Patience before early stopping
+  accumulation_interval: 1        # Gradient accumulation, Set to higher number, e.g. 4
+  log_interval: 50                # Log training process every 100 batches
+
+loss:
+  loss_name: SmoothL1Loss
+  loss_args:
+    beta: 0.1
+
+backend:
+  model_name: PatchTST
+  model_args:
+    patch_len: 64
+    stride: 32
+    d_model: 64
+    d_ff: 128
+    e_layers: 2
+    att_heads: 4
+    dropout: 0.1
+    activation: gelu
+    init_values: 0.0001
+    channel_independence: True
+    use_instance_norm: True
+
+optimiser:
+  optimiser_name: AdamW
+  optimiser_args:
+    backend:
+      lr: 0.001
+      weight_decay: 0.03
+
+lr_scheduler:
+  scheduler_name: CosineDecrease  # ExponentialDecrease, CosineDecrease
+  scheduler_args:
+    warmup_epoch: 5 # 0 for no warmup
